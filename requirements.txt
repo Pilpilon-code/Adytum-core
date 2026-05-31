@@ -1,8 +1,7 @@
-In the main file content box, paste the exact Python dependencies your `main.py` needs to talk to Google Drive and run the server:
-   ```text
-   flask
-   google-auth
-   google-auth-oauthlib
-   google-auth-httplib2
-   google-api-python-client
-   requests
+```text
+flask
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+requests
