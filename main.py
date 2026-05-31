@@ -66,7 +66,8 @@ async def ingest_thought(text_payload: str = Form(None), gear: str = Form("text"
         os.remove(temp_audio)
 
     # Invoke Dynamic Trivium Engine
-    trivium_model = genai.GenerativeModel("gemini-1.5-flash", system_instruction=SYSTEM_INSTRUCTION)
+    trivium_model = genai.GenerativeModel("models/gemini-1.5-flash")
+    system_instruction=SYSTEM_INSTRUCTION)
     response = trivium_model.generate_content(f"Process this raw {gear} thought:\n\n{processed_text}")
     
     markdown_output = f"""---
