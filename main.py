@@ -109,7 +109,7 @@ status: in-quarry
 
 {trivium_response.text}
 """
-        # Step 4: Dispatch payload directly to your Google Drive utility function
+        # Step 4: Dispatch payload directly to your existing Google Drive utility function
         filename = f"{now.strftime('%Y-%m-%d_%H%M')}_quarry_node.md"
         upload_to_google_drive(filename, markdown_output)
         
@@ -118,4 +118,3 @@ status: in-quarry
     except Exception as e:
         print(f"Error handling request: {str(e)}")
         return {"status": "error", "detail": str(e)}
-        
