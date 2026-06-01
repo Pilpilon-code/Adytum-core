@@ -32,11 +32,24 @@ def upload_to_google_drive(filename: str, content: str):
     """Quietly writes the markdown file directly to your Google Drive Cloud."""
     scopes = ['https://www.googleapis.com/auth/drive.file']
     
+    # Extract key and handle literal formatting artifacts safely
+    raw_key = os.environ.get("G_PRIVATE_KEY", "")
+    
+    # 1. Strip out any accidential literal wrapper quotes if they exist
+    raw_key = raw_key.strip('"').strip("'")
+    
+    # 2. Convert literal text escaped '\n' strings into actual programmatic newlines
+    raw_key = raw_key.replace("\\n", "\n")
+    
+    # 3. Ensure the key has standard cryptographic block headers if missing
+    if "BEGIN PRIVATE KEY" not in raw_key and raw_key:
+        raw_key = f"-----BEGIN PRIVATE KEY-----\n{raw_key}\n-----END PRIVATE KEY-----\n"
+
     creds_dict = {
         "type": "service_account",
         "project_id": os.environ.get("G_PROJECT_ID"),
         "private_key_id": os.environ.get("G_PRIVATE_KEY_ID"),
-        "private_key": os.environ.get("G_PRIVATE_KEY").replace("\\n", "\n"),
+        "private_key": raw_key,
         "client_email": os.environ.get("G_CLIENT_EMAIL"),
         "client_id": os.environ.get("G_CLIENT_ID"),
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
