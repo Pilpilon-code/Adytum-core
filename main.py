@@ -11,7 +11,8 @@ from googleapiclient.http import MediaFileUpload
 app = FastAPI(title="The Personal OS Cloud Engine")
 
 # Configure APIs
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+# Initialize the modern client (it automatically detects GEMINI_API_KEY from Render)
+client = genai.Client()
 GOOGLE_DRIVE_FOLDER_ID = os.environ.get("DRIVE_FOLDER_ID")
 
 # Dynamic System Prompt Frame
