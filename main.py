@@ -75,7 +75,9 @@ async def ingest_thought(text_payload: str = Form(None), gear: str = Form("text"
         )
         processed_text = response.text  # <-- Add this line here for files
 
-    elif thought:
+    
+        
+        elif thought:
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=f"Process this raw thought:\n\n{thought}",
