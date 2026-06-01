@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 from fastapi import FastAPI, UploadFile, File, Form
-#import google.generativeai as genai
 from google import genai
 from google.genai import types
 from google.oauth2.service_account import Credentials
@@ -10,8 +9,7 @@ from googleapiclient.http import MediaFileUpload
 
 app = FastAPI(title="The Personal OS Cloud Engine")
 
-# Configure APIs
-# Initialize the modern client (it automatically detects GEMINI_API_KEY from Render)
+# Initialize the modern client (automatically detects GEMINI_API_KEY from Render)
 client = genai.Client()
 GOOGLE_DRIVE_FOLDER_ID = os.environ.get("DRIVE_FOLDER_ID")
 
@@ -30,7 +28,6 @@ CRITICAL ACTIONS:
 Do not hard-code fixed titles; adapt titles dynamically to match the theme of the raw thought.
 """
 
-def upload_to_google_drive(filename: str, content: str):
 def upload_to_google_drive(filename: str, content: str):
     """Quietly writes the markdown file directly to your Google Drive Cloud."""
     scopes = ['https://www.googleapis.com/auth/drive.file']
@@ -56,7 +53,6 @@ def upload_to_google_drive(filename: str, content: str):
     media = MediaFileUpload(filename, mimetype='text/markdown')
     service.files().create(body=file_metadata, media_body=media, fields='id').execute()
     os.remove(filename)
-
 
 @app.post("/ingest")
 async def ingest_thought(
