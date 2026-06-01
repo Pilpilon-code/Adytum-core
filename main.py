@@ -60,34 +60,31 @@ async def ingest_thought(text_payload: str = Form(None), gear: str = Form("text"
     processed_text = text_payload
     
         if file:
-        audio_bytes = await file.read()
-        file_mime = file.content_type or "audio/mp3"
-        
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=[
-                types.Part.from_bytes(
-                    data=audio_bytes,
-                    mime_type=file_mime
-                ),
-                "Transcribe verbatim, keeping Hebrew and English meshed. No translation."
-            ]
-        )
-        processed_text = response.text  # <-- Add this line here for files
-
-    
-        
-        elif thought:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=f"Process this raw thought:\n\n{thought}",
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION
+            audio_bytes = await file.read()
+            file_mime = file.content_type or "audio/mp3"
+            
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=[
+                    types.Part.from_bytes(
+                        data=audio_bytes,
+                        mime_type=file_mime
+                    ),
+                    "Transcribe verbatim, keeping Hebrew and English meshed. No translation."
+                ]
             )
-        )
-        processed_text = response.text  # <-- This line is perfect
+            processed_text = response.text
 
-   
+        elif thought:
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=f"Process this raw thought:\n\n{thought}",
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_INSTRUCTION
+                )
+            )
+            processed_text = response.text
+
 
     # Invoke Dynamic Trivium Engine
     trivium_model = genai.GenerativeModel("models/gemini-2.5-flash")(system_instruction=SYSTEM_INSTRUCTION)
