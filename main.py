@@ -59,14 +59,33 @@ async def ingest_thought(text_payload: str = Form(None), gear: str = Form("text"
     now = datetime.now()
     processed_text = text_payload
     
-    if file:
-        temp_audio = f"temp_{file.filename}"
-        with open(temp_audio, "wb") as b: b.write(await file.read())
-        audio_cloud = genai.upload_file(path=temp_audio)
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        transcription = model.generate_content(["Transcribe verbatim, keeping Hebrew and English meshed. No translation.", audio_cloud])
-        processed_text = transcription.text
-        os.remove(temp_audio)
+        if file:
+        audio_bytes = await file.read()
+        file_mime = file.content_type or "audio/mp3"
+        
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=[
+                types.Part.from_bytes(
+                    data=audio_bytes,
+                    mime_type=file_mime
+                ),
+                "Transcribe verbatim, keeping Hebrew and English meshed. No translation."
+            ]
+        )
+        processed_text = response.text  # <-- Add this line here for files
+
+    elif thought:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=f"Process this raw thought:\n\n{thought}",
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_INSTRUCTION
+            )
+        )
+        processed_text = response.text  # <-- This line is perfect
+
+   
 
     # Invoke Dynamic Trivium Engine
     trivium_model = genai.GenerativeModel("models/gemini-2.5-flash")(system_instruction=SYSTEM_INSTRUCTION)
