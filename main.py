@@ -1,7 +1,9 @@
 import os
 from datetime import datetime
 from fastapi import FastAPI, UploadFile, File, Form
-import google.generativeai as genai
+#import google.generativeai as genai
+from google import genai
+from google.genai import types
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
