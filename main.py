@@ -55,10 +55,13 @@ def upload_to_google_drive(filename: str, content: str):
     os.remove(filename)
 
 @app.post("/ingest")
-async def ingest_thought(text_payload: str = Form(None), gear: str = Form("text"), file: UploadFile = File(None)):
-    now = datetime.now()
-    processed_text = text_payload
-    
+async def ingest_thought(
+    thought: str = Form(None),
+    file: UploadFile = File(None)
+):
+    try:
+        processed_text = ""
+
         if file:
             audio_bytes = await file.read()
             file_mime = file.content_type or "audio/mp3"
@@ -85,7 +88,20 @@ async def ingest_thought(text_payload: str = Form(None), gear: str = Form("text"
             )
             processed_text = response.text
 
+        else:
+            return {"status": "error", "message": "No input payload received."}
 
+        # --- YOUR GOOGLE DRIVE LOGIC BELOW ---
+        # Keep whatever code you have right here that handles uploading 
+        # 'processed_text' to your Google Drive folder.
+        # Just make sure your Drive lines start with 8 spaces of indentation.
+
+        return {"status": "success", "processed": True}
+
+    except Exception as e:
+        print(f"Error handling request: {str(e)}")
+        return {"status": "error", "detail": str(e)}
+       
     # Invoke Dynamic Trivium Engine
     trivium_model = genai.GenerativeModel("models/gemini-2.5-flash")(system_instruction=SYSTEM_INSTRUCTION)
     response = trivium_model.generate_content(f"Process this raw {gear} thought:\n\n{processed_text}")
