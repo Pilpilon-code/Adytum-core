@@ -31,10 +31,11 @@ Do not hard-code fixed titles; adapt titles dynamically to match the theme of th
 """
 
 def upload_to_google_drive(filename: str, content: str):
+def upload_to_google_drive(filename: str, content: str):
     """Quietly writes the markdown file directly to your Google Drive Cloud."""
     scopes = ['https://www.googleapis.com/auth/drive.file']
-    # Render reads these variables from the secure dashboard dashboard environment
-        creds_dict = {
+    
+    creds_dict = {
         "type": "service_account",
         "project_id": os.environ.get("G_PROJECT_ID"),
         "private_key_id": os.environ.get("G_PRIVATE_KEY_ID"),
@@ -43,8 +44,7 @@ def upload_to_google_drive(filename: str, content: str):
         "client_id": os.environ.get("G_CLIENT_ID"),
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
-        }
-
+    }
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     service = build('drive', 'v3', credentials=creds)
     
@@ -56,6 +56,7 @@ def upload_to_google_drive(filename: str, content: str):
     media = MediaFileUpload(filename, mimetype='text/markdown')
     service.files().create(body=file_metadata, media_body=media, fields='id').execute()
     os.remove(filename)
+
 
 @app.post("/ingest")
 async def ingest_thought(
