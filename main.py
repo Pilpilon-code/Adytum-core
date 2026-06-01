@@ -62,6 +62,7 @@ async def ingest_thought(
     try:
         processed_text = ""
 
+        # Step 1: Extract text or audio content
         if file:
             audio_bytes = await file.read()
             file_mime = file.content_type or "audio/mp3"
@@ -79,37 +80,25 @@ async def ingest_thought(
             processed_text = response.text
 
         elif thought:
-            response = client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=f"Process this raw thought:\n\n{thought}",
-                config=types.GenerateContentConfig(
-                    system_instruction=SYSTEM_INSTRUCTION
-                )
-            )
-            processed_text = response.text
+            processed_text = thought
 
         else:
             return {"status": "error", "message": "No input payload received."}
 
-        # --- YOUR GOOGLE DRIVE LOGIC BELOW ---
-        # Keep whatever code you have right here that handles uploading 
-        # 'processed_text' to your Google Drive folder.
-        # Just make sure your Drive lines start with 8 spaces of indentation.
-
-        return {"status": "success", "processed": True}
-
-    except Exception as e:
-        print(f"Error handling request: {str(e)}")
-        return {"status": "error", "detail": str(e)}
-       
-    # Invoke Dynamic Trivium Engine
-    trivium_model = genai.GenerativeModel("models/gemini-2.5-flash")(system_instruction=SYSTEM_INSTRUCTION)
-    response = trivium_model.generate_content(f"Process this raw {gear} thought:\n\n{processed_text}")
-    
-    markdown_output = f"""---
+        # Step 2: Invoke Dynamic Trivium Engine with system instructions
+        trivium_response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=f"Process this raw thought:\n\n{processed_text}",
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_INSTRUCTION
+            )
+        )
+        
+        # Step 3: Build Markdown metadata header and body layout
+        now = datetime.now()
+        markdown_output = f"""---
 date: {now.strftime('%Y-%m-%d')}
 time: {now.strftime('%H:%M')}
-gear: {gear}
 status: in-quarry
 ---
 
@@ -118,8 +107,15 @@ status: in-quarry
 
 ---
 
-{response.text}
+{trivium_response.text}
 """
-    filename = f"{now.strftime('%Y-%m-%d_%H%M')}_quarry_node.md"
-    upload_to_google_drive(filename, markdown_output)
-    return {"status": "success"}
+        # Step 4: Dispatch payload directly to your Google Drive utility function
+        filename = f"{now.strftime('%Y-%m-%d_%H%M')}_quarry_node.md"
+        upload_to_google_drive(filename, markdown_output)
+        
+        return {"status": "success", "filename": filename}
+
+    except Exception as e:
+        print(f"Error handling request: {str(e)}")
+        return {"status": "error", "detail": str(e)}
+        
